@@ -1,0 +1,7 @@
+[
+    {
+        "directory": "kernel/include/kernel",
+        "file": "kernel/include/kernel/vga_tty",
+        "arguments": ["clang", "-x", "c-header", "kernel/include/kernel/vga_tty"]
+    }
+]

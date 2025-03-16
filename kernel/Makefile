@@ -1,0 +1,88 @@
+DEFAULT_HOST!=../default-host.sh
+HOST?=$(DEFAULT_HOST)
+HOSTARCH!=../target-triplet-to-host.sh $(HOST)
+
+CFLAGS?=-O2 -g
+CXXFLAGS?=
+LDFLAGS?=
+LIBS?=
+
+DESTDIR?=
+PREFIX?=/usr/local
+EXEC_PREFIX?=$(PREFIX)
+BOOTDIR?=$(EXEC_PREFIX)/boot
+INCLUDEDIR?=$(PREFIX)/include
+
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
+CXXFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -fno-exceptions -fno-rtti
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS) -nostdlib -lk -lgcc
+
+ARCHDIR=arch/$(HOSTARCH)
+
+include $(ARCHDIR)/make.config
+
+CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+CXXFLAGS:=$(CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
+LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
+LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
+
+KERNEL_OBJS=\
+$(KERNEL_ARCH_OBJS)\
+kernel.o
+
+OBJS=\
+$(ARCHDIR)/crti.o\
+$(ARCHDIR)/crtbegin.o\
+$(KERNEL_OBJS)\
+$(ARCHDIR)/crtend.o\
+$(ARCHDIR)/crtn.o\
+
+LINK_LIST=\
+$(LDFLAGS) \
+$(ARCHDIR)/crti.o \
+$(ARCHDIR)/crtbegin.o \
+$(KERNEL_OBJS) \
+$(LIBS) \
+$(ARCHDIR)/crtend.o \
+$(ARCHDIR)/crtn.o \
+
+.PHONY: all clean install install-headers install-kernel
+.SUFFIXES: .o .c .cpp .S
+
+project:=sinkhole.kernel
+
+all: sinkhole.kernel
+
+$(project): $(OBJS) $(ARCHDIR)/linker.ld
+	$(CPP) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(CXXFLAGS) $(LINK_LIST)
+	grub-file --is-x86-multiboot $@
+
+$(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
+	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
+
+.c.o:
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CXXFLAGS)
+
+.cpp.o:
+	$(CPP) -MD -c $< -o $@ -std=c++17 $(CFLAGS) $(CXXFLAGS)
+
+.S.o:
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+
+clean:
+	rm -rf $(project)
+	rm -f $(OBJS) *.o */*.o */*/*.o
+	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
+
+install: install-headers install-kernel
+
+install-headers:
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/
+
+install-kernel: $(project)
+	mkdir -p $(DESTDIR)$(BOOTDIR)
+	cp sinkhole.kernel $(DESTDIR)$(BOOTDIR)
+
+-include $(OBJS:.o=.d)
