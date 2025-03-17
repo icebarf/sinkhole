@@ -1,7 +1,7 @@
 
-DEFAULT_HOST!=../default-host.sh
+DEFAULT_HOST:=$(shell ../buildutils/default-host.sh)
 HOST?=$(DEFAULT_HOST)
-HOSTARCH!=../target-triplet-to-host.sh $(HOST)
+HOSTARCH:=$(shell ../buildutils/target-triplet-to-host.sh $(HOST))
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -18,9 +18,9 @@ LIBDIR?=$(EXEC_PREFIX)/lib
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
 CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
-LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
-LIBK_CXXFLAGS:$(CXXFLAGS)
+LIBSINKC_CFLAGS:=$(CFLAGS)
+LIBSINKC_CPPFLAGS:=$(CPPFLAGS) -D__is_libsinkc
+LIBSINKC_CXXFLAGS:$(CXXFLAGS)
 
 ARCHDIR=arch/$(HOSTARCH)
 
@@ -29,9 +29,9 @@ include $(ARCHDIR)/make.config
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 CXXFLAGS:=$(CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
-LIBK_CXXFLAGS:=$(LIBK_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
+LIBSINKC_CFLAGS:=$(LIBSINKC_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBSINKC_CPPFLAGS:=$(LIBSINKC_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+LIBSINKC_CXXFLAGS:=$(LIBSINKC_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
@@ -54,21 +54,21 @@ OBJS=\
 $(FREEOBJS) \
 $(HOSTEDOBJS) \
 
-LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
+LIBSINKC_OBJS=$(FREEOBJS:.o=.libsinkc.o)
 
-#BINARIES=libc.a libk.a
-BINARIES=libk.a
+#BINARIES=libc.a libsinkc.a
+BINARIES=libsinkc.a
 
 .PHONY: all clean install install-headers install-libs
-.SUFFIXES: .o .libk.o .c .S
+.SUFFIXES: .o .libsinkc.o .c .S
 
 all: $(BINARIES)
 
 libc.a: $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
-libk.a: $(LIBK_OBJS)
-	$(AR) rcs $@ $(LIBK_OBJS)
+libsinkc.a: $(LIBSINKC_OBJS)
+	$(AR) rcs $@ $(LIBSINKC_OBJS)
 
 .c.o:
 	echo "LIBC .c.o"
@@ -77,16 +77,16 @@ libk.a: $(LIBK_OBJS)
 .S.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
-.c.libk.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS) -D__is_libk
+.c.libsinkc.o:
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) -D__is_libsinkc
 
-.S.libk.o:
-	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+.S.libsinkc.o:
+	$(CC) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS)
 
 clean:
 	rm -f $(BINARIES) *.a
-	rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
-	rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	rm -f $(OBJS) $(LIBSINKC_OBJS) *.o */*.o */*/*.o
+	rm -f $(OBJS:.o=.d) $(LIBSINKC_OBJS:.o=.d) *.d */*.d */*/*.d
 
 install: install-headers install-libs
 
@@ -99,4 +99,4 @@ install-libs: $(BINARIES)
 	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
 -include $(OBJS:.o=.d)
--include $(LIBK_OBJS:.o=.d)
+-include $(LIBSINKC_OBJS:.o=.d)
