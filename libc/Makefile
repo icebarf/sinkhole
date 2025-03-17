@@ -4,6 +4,7 @@ HOST?=$(DEFAULT_HOST)
 HOSTARCH!=../target-triplet-to-host.sh $(HOST)
 
 CFLAGS?=-O2 -g
+CPPFLAGS?=
 CXXFLAGS?=
 LDFLAGS?=
 LIBS?=
@@ -15,18 +16,22 @@ INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
-CXXFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude -fno-exceptions -fno-rtti
+CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
+CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CXXFLAGS:$(CXXFLAGS) -D__is_libk
+LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
+LIBK_CXXFLAGS:$(CXXFLAGS)
 
 ARCHDIR=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 CXXFLAGS:=$(CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+LIBK_CXXFLAGS:=$(LIBK_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
@@ -73,11 +78,9 @@ libk.a: $(LIBK_OBJS)
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
 
 .c.libk.o:
-	echo "This too was called"
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS) -D__is_libk
 
 .S.libk.o:
-	echo "This was called"
 	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
 
 clean:

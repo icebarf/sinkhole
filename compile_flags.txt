@@ -3,4 +3,3 @@
 --sysroot=sysroot/
 -isystem=/usr
 --gcc-install-dir=/home/ice/x-tools/i686-unknown-elf/lib/gcc/i686-unknown-elf/13.2.0/
--include-pch kernel/include/kernel/vga_tty.pch

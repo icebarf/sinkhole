@@ -7,7 +7,7 @@ export HOST=${HOST:-$(./default-host.sh)}
 export AR=${HOST}-ar
 export AS=${HOST}-as
 export CC=${HOST}-cc
-export CPP=${HOST}-c++
+export CXX=${HOST}-c++
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX
@@ -20,9 +20,9 @@ export CXXFLAGS=''
 
 export SYSROOT="$(pwd)/sysroot"
 export CC="$CC --sysroot=$SYSROOT"
-export CPP="$CPP --sysroot=$SYSROOT"
+export CXX="$CXX --sysroot=$SYSROOT"
 
 if echo "$HOST" | grep -Eq -- '-elf($|-)'; then
   export CC="$CC -isystem=$INCLUDEDIR"
-  export CPP="$CPP -isystem=$INCLUDEDIR"
+  export CXX="$CXX -isystem=$INCLUDEDIR"
 fi

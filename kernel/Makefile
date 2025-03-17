@@ -3,6 +3,7 @@ HOST?=$(DEFAULT_HOST)
 HOSTARCH!=../target-triplet-to-host.sh $(HOST)
 
 CFLAGS?=-O2 -g
+CPPFLAGS?=
 CXXFLAGS?=
 LDFLAGS?=
 LIBS?=
@@ -14,7 +15,8 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
-CXXFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude -fno-exceptions -fno-rtti
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude 
+CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
@@ -23,6 +25,7 @@ ARCHDIR=arch/$(HOSTARCH)
 include $(ARCHDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 CXXFLAGS:=$(CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
@@ -55,17 +58,17 @@ project:=sinkhole.kernel
 all: sinkhole.kernel
 
 $(project): $(OBJS) $(ARCHDIR)/linker.ld
-	$(CPP) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(CXXFLAGS) $(LINK_LIST)
+	$(CXX) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot $@
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 .c.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CXXFLAGS)
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
 .cpp.o:
-	$(CPP) -MD -c $< -o $@ -std=c++17 $(CFLAGS) $(CXXFLAGS)
+	$(CXX) -MD -c $< -o $@ -std=c++17 $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 .S.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
