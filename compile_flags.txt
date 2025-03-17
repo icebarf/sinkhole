@@ -1,4 +1,4 @@
--Iinclude/kernel
+-Ikernel/include
 --target=i686-unknown-elf
 --sysroot=sysroot/
 -isystem=/usr
