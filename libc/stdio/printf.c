@@ -1,11 +1,23 @@
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 static int
-numlen(long num, long base)
+__putstring(const char* str)
+{
+  int counter = 0;
+  while (*str) {
+    putchar(*str);
+    counter++;
+    str++;
+  }
+
+  return counter;
+}
+
+static int
+__numlen(long num, long base)
 {
   int len = 0;
   while (num) {
@@ -15,17 +27,22 @@ numlen(long num, long base)
   return len;
 }
 
-void
-iota_write(long num, int base)
+static char*
+__iota_num_string(long num, int base)
 {
   const char chars[] = "0123456789ABCDEF";
+  static char buf[100] = { 0 }; // more than enough
+  memset(buf, 0, sizeof(buf));
+  int cursor = __numlen(num, base);
 
   long tmp = num;
   while (tmp) {
     long t = tmp % base;
-    putchar(chars[t]);
+    buf[--cursor] = chars[t];
     tmp /= base;
   }
+
+  return buf;
 }
 
 int
@@ -49,32 +66,36 @@ printf(const char* __restrict fmt, ...)
             fmt++;
             if (*fmt == 'd') {
               long a = va_arg(args, long);
-              int l = numlen(a, 10);
-              iota_write(a, 10);
+              int l = __numlen(a, 10);
+              const char* num = __iota_num_string(a, 10);
+              __putstring(num);
               cursor += l;
             } else if (*fmt == 'x') {
               long a = va_arg(args, long);
-              int l = numlen(a, 16);
+              int l = __numlen(a, 16);
               putchar('0');
               putchar('x');
-              iota_write(a, 16);
+              const char* num = __iota_num_string(a, 16);
+              __putstring(num);
               cursor += l;
             }
             break;
           }
           case 'd': {
-            int a = va_arg(args, int);
-            int l = numlen(a, 10);
-            iota_write(a, 10);
+            long a = va_arg(args, long);
+            int l = __numlen(a, 10);
+            const char* num = __iota_num_string(a, 10);
+            __putstring(num);
             cursor += l;
             break;
           }
           case 'x': {
-            int a = va_arg(args, int);
-            int l = numlen(a, 16);
+            long a = va_arg(args, long);
+            int l = __numlen(a, 16);
             putchar('0');
             putchar('x');
-            iota_write(a, 16);
+            const char* num = __iota_num_string(a, 16);
+            __putstring(num);
             cursor += l;
             break;
           }
@@ -85,11 +106,7 @@ printf(const char* __restrict fmt, ...)
           }
           case 's': {
             const char* str = va_arg(args, const char*);
-            int l = (int)strlen(str);
-            while (*str) {
-              putchar(*str);
-              str++;
-            }
+            int l = __putstring(str);
             cursor += l;
             break;
           }
