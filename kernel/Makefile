@@ -1,6 +1,6 @@
-DEFAULT_HOST!=../default-host.sh
+DEFAULT_HOST:=$(shell ../buildutils/default-host.sh)
 HOST?=$(DEFAULT_HOST)
-HOSTARCH!=../target-triplet-to-host.sh $(HOST)
+HOSTARCH:=$(shell ../buildutils/target-triplet-to-host.sh $(HOST))
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -18,7 +18,7 @@ CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude 
 CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LDFLAGS:=$(LDFLAGS)
-LIBS:=$(LIBS) -nostdlib -lk -lgcc
+LIBS:=$(LIBS) -nostdlib -lsinkc -lgcc
 
 ARCHDIR=arch/$(HOSTARCH)
 
@@ -50,14 +50,14 @@ $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
-.PHONY: all clean install install-headers install-kernel
+.PHONY: all clean install install-headers install-kernel project_kernel
 .SUFFIXES: .o .c .cpp .S
 
-project:=sinkhole.kernel
+project_kernel:=$(PROJECT).kernel
 
-all: sinkhole.kernel
+all: $(project_kernel)
 
-$(project): $(OBJS) $(ARCHDIR)/linker.ld
+$(project_kernel): $(OBJS) $(ARCHDIR)/linker.ld
 	$(CXX) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LINK_LIST)
 	grub-file --is-x86-multiboot $@
 
@@ -84,8 +84,8 @@ install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/
 
-install-kernel: $(project)
+install-kernel: $(project_kernel)
 	mkdir -p $(DESTDIR)$(BOOTDIR)
-	cp sinkhole.kernel $(DESTDIR)$(BOOTDIR)
+	cp $(project_kernel) $(DESTDIR)$(BOOTDIR)
 
 -include $(OBJS:.o=.d)
