@@ -2,9 +2,6 @@
 #include <cstdint>
 #include <string.h>
 
-// extern "C" size_t
-// strlen(const char* str);
-
 #include <kernel/vga_tty>
 
 #include "vga.h"
@@ -94,7 +91,7 @@ vga_term_putchar(const char c)
   }
 }
 
-extern "C" void
+void
 vga_term_write(const char* data, std::size_t size)
 {
   for (size_t i = 0; i < size; i++) {
