@@ -4,7 +4,7 @@
 void __attribute((noreturn))
 abort(void)
 {
-#if defined(__is_libk)
+#if defined(__is_libsinkc)
   // TODO: Proper Kernel Panic
   printf("sinkhole kernel panic, killing myself!\n");
   printf("sinkhole kernel: abort()\n");
