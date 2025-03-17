@@ -6,14 +6,10 @@
 static int
 __putstring(const char* str)
 {
-  int counter = 0;
-  while (*str) {
-    putchar(*str);
-    counter++;
-    str++;
-  }
-
-  return counter;
+  int len = (int)strlen(str);
+  for (int i = 0; i < len; i++)
+    putchar(str[i]);
+  return len;
 }
 
 static int
@@ -27,9 +23,11 @@ __numlen(long num, long base)
   return len;
 }
 
-static char*
+static const char*
 __iota_num_string(long num, int base)
 {
+  if (num == 0)
+    return "0";
   const char chars[] = "0123456789ABCDEF";
   static char buf[100] = { 0 }; // more than enough
   memset(buf, 0, sizeof(buf));
