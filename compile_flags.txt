@@ -1,5 +1,5 @@
 -Ikernel/include
 --target=i686-unknown-elf
 --sysroot=sysroot/
--isystem=/usr
+-isystem=/usr/include
 --gcc-install-dir=/home/ice/x-tools/i686-unknown-elf/lib/gcc/i686-unknown-elf/13.2.0/
