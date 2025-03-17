@@ -1,0 +1,7 @@
+#ifndef SINKHOLE_KERNEL_SERIAL_H
+#define SINKHOLE_KERNEL_SERIAL_H
+
+int
+init_serial();
+
+#endif

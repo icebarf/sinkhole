@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include <kernel/serial>
 #include <kernel/vga_tty>
 
 extern "C" void
@@ -7,10 +8,11 @@ kernel_main()
 {
   vga_term_init();
   printf("Hello, kernel world!\n");
-  for (int i = 0; i < 23; i++) {
-    puts("nah");
+  printf("no - %d\n", 25);
+  int v = init_serial();
+  if (v >= 1) {
+    printf("sinkhole: serial: %s with code %d\n", "initialization failed", v);
+    return;
   }
-  puts("25");
-  puts("26");
-  printf("Hello, kernel world!\n");
+  printf("sinkhole: serial: %s with code %d\n", "initialization success", v);
 }
