@@ -4,7 +4,7 @@
 
 #include <kernel/vga_tty>
 
-#include "vga.h"
+#include "vga.hpp"
 
 constexpr std::size_t VGA_WIDTH = 80;
 constexpr std::size_t VGA_HEIGHT = 25;
@@ -20,7 +20,7 @@ vga_term_init()
 {
   vga_term_row = 0;
   vga_term_column = 0;
-  vga_term_color = vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+  vga_term_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
   vga_term_buffer = VGA_MEMORY;
   for (size_t y = 0; y < VGA_HEIGHT; y++) {
     for (size_t x = 0; x < VGA_WIDTH; x++) {
