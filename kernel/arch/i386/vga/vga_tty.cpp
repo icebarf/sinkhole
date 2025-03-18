@@ -20,7 +20,7 @@ vga_term_init()
 {
   vga_term_row = 0;
   vga_term_column = 0;
-  vga_term_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
+  vga_term_color = vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
   vga_term_buffer = VGA_MEMORY;
   for (size_t y = 0; y < VGA_HEIGHT; y++) {
     for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -46,9 +46,9 @@ vga_term_putentryat(unsigned char c, uint8_t color, size_t x, size_t y)
 void
 vga_term_clear_lines(size_t line)
 {
-  for (size_t y = VGA_HEIGHT - line; y < VGA_WIDTH; y++) {
+  for (size_t y = VGA_HEIGHT - line; y < VGA_HEIGHT; y++) {
     for (size_t x = 0; x < VGA_WIDTH; x++) {
-      vga_term_putentryat(' ', vga_term_color, y, x);
+      vga_term_putentryat(' ', vga_term_color, x, y);
     }
   }
 }
@@ -59,7 +59,7 @@ vga_term_scroll_lines(size_t line)
   for (size_t y = line - 1; y < VGA_HEIGHT; y++)
     for (size_t x = 0; x < VGA_WIDTH; x++) {
       const size_t index = ((y - (line - 1)) * VGA_WIDTH) + x;
-      const size_t index_next = (y + 1) * VGA_WIDTH + x;
+      const size_t index_next = ((y + 1) * VGA_WIDTH) + x;
       vga_term_buffer[index] = vga_term_buffer[index_next];
     }
 }

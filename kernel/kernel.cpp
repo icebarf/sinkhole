@@ -10,12 +10,11 @@ kernel_main()
 {
   vga_term_init();
   printf("Hello, kernel world!\n");
-  for (int i = 0; i < 23; i++)
-    printf("%d\n", i);
   int v = init_serial();
   if (v >= 1) {
-    printf("sinkhole: serial: initialization success with code %d\n", v);
+    printf("sinkhole: serial: %s with code %d\n", "initialization failure", v);
     return;
   }
   printf("sinkhole: serial: %s with code %d\n", "initialization success", v);
+  printf("kernel returning to _start now... hlt!");
 }
