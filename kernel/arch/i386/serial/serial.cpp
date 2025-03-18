@@ -2,12 +2,6 @@
 
 #include <kernel/serial>
 
-uint16_t* SERIAL_BASE_ADDR = (uint16_t*)0x0400;
-uint16_t* SERIAL_COM_1 = (uint16_t*)SERIAL_BASE_ADDR + 0;
-uint16_t* SERIAL_COM_2 = (uint16_t*)SERIAL_BASE_ADDR + 2;
-uint16_t* SERIAL_COM_3 = (uint16_t*)SERIAL_BASE_ADDR + 4;
-uint16_t* SERIAL_COM_4 = (uint16_t*)SERIAL_BASE_ADDR + 6;
-
 static void
 outb(uint16_t* port, uint8_t byte)
 {
@@ -36,30 +30,51 @@ inb(uint16_t* port)
   return ret;
 }
 
-#define PORT (uint16_t*)0x3f8 // COM1
+// COM1 Port Address
+#define COM (uint16_t* const)0x3f8
+
+// Each of these named addresses are 8-bit registers
+#define RW_BUFFER (COM + 0)
+#define BAUD_DIVISOR_LOWB (COM + 0) // Accessible if LINE_CONTROL MSB is set
+#define IRQ_ENABLE_REG (COM + 1)
+#define BAUD_DIVISOR_HIGHB (COM + 1) // Accessible if LINE_CONTROL MSB is set
+#define IRQ_IDENTIFY (COM + 2)
+#define FIFO_CONTROL (COM + 2)
+#define LINE_CONTROL (COM + 3) // MSB is DLAB which if set allows BAUD Control
+#define MODEM_CONTROL (COM + 4)
+#define LINE_STATUS (COM + 5)
+#define MODEM_STATUS (COM + 6)
+#define SCRATCH_REG (COM + 7)
 
 int
 init_serial()
 {
-  outb(PORT + 1, 0x00); // Disable all interrupts
-  outb(PORT + 3, 0x80); // Enable DLAB (set baud rate divisor)
-  outb(PORT + 0, 0x03); // Set divisor to 3 (lo byte) 38400 baud
-  outb(PORT + 1, 0x00); //                  (hi byte)
-  outb(PORT + 3, 0x03); // 8 bits, no parity, one stop bit
-  outb(PORT + 2, 0xC7); // Enable FIFO, clear them, with 14-byte threshold
-  outb(PORT + 4, 0x0B); // IRQs enabled, RTS/DSR set
-  outb(PORT + 4, 0x1E); // Set in loopback mode, test the serial chip
-  outb(PORT + 0, 0xAE); // Test serial chip (send byte 0xAE and check if serial
-                        // returns same byte)
+  // clang-format off
+  /* See
+   * https://wiki.osdev.org/Serial_Ports#Programming_the_Serial_Communications_Port
+   * for what the magic values mean when setting up various registers
+   */
+  outb(IRQ_ENABLE_REG,      0b0);
+  outb(LINE_CONTROL,        0b1000'0000); // Read comment above
+  outb(BAUD_DIVISOR_LOWB,   0b0000'0011); // Set divisor to 3 - 38400 baud
+  outb(BAUD_DIVISOR_HIGHB,  0b0);
+  outb(LINE_CONTROL,        0b0000'0011); // 8 bits, no parity, one stop bit
+  outb(FIFO_CONTROL,        0b1100'0111); // Enable FIFO, clear them, with 14-byte threshold
+  outb(MODEM_CONTROL,       0b0000'1011); // IRQs enabled, RTS/DSR set
+  outb(MODEM_CONTROL,       0b0001'1110); // Set in loopback mode, test the serial chip
+  // clang-format on
+
+  // Test serial chip (send 0xAE and check if it returns same byte)
+  outb(RW_BUFFER, 0xAE);
 
   // Check if serial is faulty (i.e: not same byte as sent)
   int rval;
-  if ((rval = inb(PORT + 0)) != 0xAE) {
+  if ((rval = inb(RW_BUFFER)) != 0xAE) {
     return rval;
   }
 
   // If serial is not faulty set it in normal operation mode
   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
-  outb(PORT + 4, 0x0F);
+  outb(MODEM_CONTROL, 0b0000'1111);
   return 0;
 }
