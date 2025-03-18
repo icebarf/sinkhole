@@ -15,7 +15,7 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude 
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -D__SINKHOLE_KERNEL_DO_SERIAL_IO_DEBUG -Iinclude 
 CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lsinkc -lgcc
@@ -32,7 +32,8 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS)\
-kernel.o
+io.o\
+kernel.o\
 
 OBJS=\
 $(ARCHDIR)/crti.o\
@@ -82,7 +83,7 @@ install: install-headers install-kernel
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/
+	cp -Rf --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-kernel: $(project_kernel)
 	mkdir -p $(DESTDIR)$(BOOTDIR)

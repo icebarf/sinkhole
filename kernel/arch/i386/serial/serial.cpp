@@ -1,53 +1,37 @@
 #include <cstdint>
-
 #include <kernel/serial>
+#include <kernel/vga_tty>
 
-static void
-outb(uint16_t* port, uint8_t byte)
-{
-  (void)port;
-  (void)byte;
-  asm volatile("movw %%di, %%dx\n"
-               "movw %%si, %%ax\n"
-               "outw %%ax, %%dx\n"
-               :
-               :
-               : "dx", "ax");
-}
+#include "serial.hpp"
 
-static uint16_t
-inb(uint16_t* port)
+static uint8_t
+inb(uint16_t* const port)
 {
-  (void)port;
-  uint16_t ret = 255;
-  asm volatile("movw %%di, %%dx\n"
-               "inw %%dx, %%ax\n"
-               "mov %%ax, %0\n"
-               : "+r"(ret)
-               :
-               : "dx", "ax");
+  uint8_t ret = 255;
+  // SEE: https://gcc.gnu.org/onlinedocs/gcc/Machine-Constraints.html
+  // section: x86 family—config/i386/constraints.md
+  // translates to `inb dx, al`
+  asm volatile("inb %[_port], %[_ret]\n"
+               : [_ret] "=a"(ret)
+               : [_port] "d"(port)
+               :);
 
   return ret;
 }
 
-// COM1 Port Address
-#define COM (uint16_t* const)0x3f8
+static void
+outb(uint16_t* const port, uint8_t byte)
+{
+  // translates to `outb al, dx`
+  asm volatile("outb %[_byte], %[_port]\n"
+               :
+               : [_port] "d"(port), [_byte] "a"(byte)
+               :);
+}
 
-// Each of these named addresses are 8-bit registers
-#define RW_BUFFER (COM + 0)
-#define BAUD_DIVISOR_LOWB (COM + 0) // Accessible if LINE_CONTROL MSB is set
-#define IRQ_ENABLE_REG (COM + 1)
-#define BAUD_DIVISOR_HIGHB (COM + 1) // Accessible if LINE_CONTROL MSB is set
-#define IRQ_IDENTIFY (COM + 2)
-#define FIFO_CONTROL (COM + 2)
-#define LINE_CONTROL (COM + 3) // MSB is DLAB which if set allows BAUD Control
-#define MODEM_CONTROL (COM + 4)
-#define LINE_STATUS (COM + 5)
-#define MODEM_STATUS (COM + 6)
-#define SCRATCH_REG (COM + 7)
-
+/* SEE: serial.hpp for information about these names */
 int
-init_serial()
+serial_init()
 {
   // clang-format off
   /* See
@@ -77,4 +61,34 @@ init_serial()
   // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
   outb(MODEM_CONTROL, 0b0000'1111);
   return 0;
+}
+
+static bool
+check_serial_recvd()
+{
+  return inb(LINE_STATUS) & 0b0000'0001;
+}
+
+static bool
+check_serial_sendable()
+{
+  return inb(LINE_STATUS) & 0b0010'0000;
+}
+
+uint8_t
+serial_read()
+{
+  while (check_serial_recvd() != true)
+    ;
+
+  return inb(RW_BUFFER);
+}
+
+void
+serial_write(int8_t byte)
+{
+  while (check_serial_sendable() != true)
+    ;
+
+  outb(RW_BUFFER, (uint8_t)byte);
 }
