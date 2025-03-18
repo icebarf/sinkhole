@@ -41,7 +41,7 @@ iso: build
 	grub-mkrescue -o $(PROJECT).iso $(ISODIR)
 
 launch: iso
-	qemu-system-$(shell ./buildutils/target-triplet-to-host.sh $(HOST)) -cdrom $(PROJECT).iso
+	qemu-system-$(shell ./buildutils/target-triplet-to-host.sh $(HOST)) -cdrom $(PROJECT).iso -serial file:serial.log
 
 # Get each directory's name and put `_dir_c` behind it
 CLEANING_AREA:=$(foreach dir, $(PROJECTS),$(dir)_dir_c)
@@ -54,3 +54,4 @@ ROOT_CLEAN:
 	rm -rf sysroot
 	rm -rf isodir
 	rm -rf sinkhole.iso
+	rm -rf $(wildcard *.log)

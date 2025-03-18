@@ -3,3 +3,4 @@ isodir
 sysroot
 oldbuild
 .cache
+*.log

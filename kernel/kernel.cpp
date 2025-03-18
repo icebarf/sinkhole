@@ -1,20 +1,23 @@
-#include <stdio.h>
-
+#include <kernel/io>
 #include <kernel/serial>
 #include <kernel/vga_tty>
 
-// TODO: Issue with printing exactly the 25th line
-// output is truncated
+#include <stdio.h>
+
 extern "C" void
 kernel_main()
 {
+  // initialize VGA and Serial components
   vga_term_init();
-  printf("Hello, kernel world!\n");
-  int v = init_serial();
+  int v = serial_init();
+  printf("sinkhole: vga: initialized\n");
   if (v >= 1) {
     printf("sinkhole: serial: %s with code %d\n", "initialization failure", v);
     return;
   }
   printf("sinkhole: serial: %s with code %d\n", "initialization success", v);
-  printf("kernel returning to _start now... hlt!");
+
+  printf("Hello, kernel world!\n");
+
+  printf("hlt...");
 }
