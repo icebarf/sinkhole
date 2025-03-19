@@ -1,23 +1,25 @@
-#include <kernel/io>
+#include <kernel/log>
 #include <kernel/serial>
 #include <kernel/vga_tty>
-
-#include <stdio.h>
 
 extern "C" void
 kernel_main()
 {
+  logger klog;
+
   // initialize VGA and Serial components
   vga_term_init();
+  klog.write(logger::Components::VGA, "initialized");
+
   int v = serial_init();
-  printf("sinkhole: vga: initialized\n");
   if (v >= 1) {
-    printf("sinkhole: serial: %s with code %d\n", "initialization failure", v);
+    klog.write(
+      logger::Components::Serial, "initialization failure: code: %d", v);
     return;
   }
-  printf("sinkhole: serial: %s with code %d\n", "initialization success", v);
+  klog.write(logger::Components::Serial, "initialized: code: %d", v);
 
-  printf("Hello, kernel world!\n");
+  klog.write(logger::Components::Kernel, "Hello!");
 
-  printf("hlt...");
+  klog.write(logger::Components::Kernel, "hlt...");
 }
