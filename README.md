@@ -23,7 +23,7 @@ Currently everything is rudimentary, getting up from the ground.
 - [ ] Serial Input Output
   - [ ] Input
   - [x] Output
-- [ ] Stack Smashing Protection
+- [x] Stack Smashing Protection
 - [x] VGA Output
 
 ### References

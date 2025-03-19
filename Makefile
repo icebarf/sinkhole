@@ -41,7 +41,7 @@ iso: build
 	grub-mkrescue -o $(PROJECT).iso $(ISODIR)
 
 launch: iso
-	qemu-system-$(shell ./buildutils/target-triplet-to-host.sh $(HOST)) -cdrom $(PROJECT).iso -serial file:serial.log
+	qemu-system-$(shell ./buildutils/target-triplet-to-host.sh $(HOST)) -cdrom $(PROJECT).iso -serial file:serial.log -cpu EPYC -m 512
 
 # Get each directory's name and put `_dir_c` behind it
 CLEANING_AREA:=$(foreach dir, $(PROJECTS),$(dir)_dir_c)

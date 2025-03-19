@@ -1,8 +1,10 @@
-#include <kernel/log>
 #include <kernel/serial>
+#include <kernel/utils/log>
 #include <kernel/vga_tty>
 
 using comp = logger::Components;
+
+extern bool __stack_guard_initialized;
 
 extern "C" void
 kernel_main()
@@ -19,6 +21,11 @@ kernel_main()
     return;
   }
   klog.write(comp::Serial, "initialized: code: %d", v);
+
+  if (!__stack_guard_initialized) {
+    klog.write(comp::StackGuard, "uninitialized");
+  }
+  klog.write(comp::StackGuard, "was intialized at boot");
 
   klog.write(comp::Kernel, "Hello!");
 

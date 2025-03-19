@@ -14,7 +14,7 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -fstack-protector-strong
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -D__SINKHOLE_KERNEL_DO_SERIAL_IO_DEBUG -Iinclude 
 CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LDFLAGS:=$(LDFLAGS)
@@ -33,8 +33,10 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS)\
 io.o\
-log.o\
+utils/log.o\
+utils/random.o\
 kernel.o\
+stack_protect.o\
 
 OBJS=\
 $(ARCHDIR)/crti.o\
