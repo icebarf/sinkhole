@@ -10,7 +10,8 @@ struct logger
     Kernel,
     VGA,
     Serial,
-    Count = 3
+    StackGuard,
+    Count = 4
   };
 
   const char* get_component_string(Components c);
