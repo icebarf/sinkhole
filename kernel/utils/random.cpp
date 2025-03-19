@@ -1,12 +1,4 @@
-#include <kernel/utils>
-
-uint8_t
-kgen_random_8b()
-{
-  uint8_t ret;
-  asm volatile("rdrand %0\n" : "=a"(ret));
-  return ret;
-}
+#include <kernel/utils/random>
 
 uint16_t
 kgen_random_16b()
