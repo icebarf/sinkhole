@@ -6,8 +6,8 @@ abort(void)
 {
 #if defined(__is_libsinkc)
   // TODO: Proper Kernel Panic
-  printf("sinkhole kernel panic, killing myself!\n");
-  printf("sinkhole kernel: abort()\n");
+  printf("Kernel: panic condition...\n");
+  printf("Kernel: exiting execution - hlt...\n");
   asm volatile("hlt");
 #else
   // TODO: Proper userspace abort
