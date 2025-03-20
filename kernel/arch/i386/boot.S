@@ -21,6 +21,13 @@ stack_top:
 .type _start, @function
 _start:
   movl $stack_top, %esp
+  # These two are filled up by GRUB according to Multiboot spec
+  # according to system-V abi, we push these two registers and 
+  # treat them as arguments to `kernel_main`
+  # TODO: do above more elegantly as the functions before 
+  #       kernel_main may hijack.
+  push %eax
+  push %ebx
   call _init
   call stack_guard_init
   call kernel_main
