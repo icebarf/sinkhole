@@ -61,6 +61,7 @@ printf(const char* __restrict fmt, ...)
         fmt++;
         switch (*fmt) {
           case 'l': {
+          LONG_LONG:
             fmt++;
             if (*fmt == 'd') {
               long a = va_arg(args, long);
@@ -76,7 +77,8 @@ printf(const char* __restrict fmt, ...)
               const char* num = __iota_num_string(a, 16);
               __putstring(num);
               cursor += l;
-            }
+            } else if (*fmt == 'l')
+              goto LONG_LONG;
             break;
           }
           case 'd': {
