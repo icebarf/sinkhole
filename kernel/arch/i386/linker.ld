@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-  . = 2M;
+  . = 1M;
 
   .text BLOCK(4K) : ALIGN(4K)
   {
@@ -25,4 +25,6 @@ SECTIONS
     *(COMMON)
     *(.bss)
   }
+
+  kernel_end = (. + 3) & ~3;
 }

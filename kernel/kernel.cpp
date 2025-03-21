@@ -1,3 +1,5 @@
+#include <cstdint>
+
 #include <kernel/arch/i386/mem/multiboot.h>
 #include <kernel/io/serial.hpp>
 #include <kernel/io/vga_tty.hpp>
@@ -12,6 +14,8 @@ using comp = logger::Components;
 static constexpr int MAX_WORKABLE_MEM_ENTRIES = 20;
 
 extern bool __stack_guard_initialized;
+
+extern uintptr_t kernel_end;
 
 void
 output_init()
@@ -42,7 +46,7 @@ struct memory_region
 {
   uint64_t base_addr;
   uint64_t len;
-  uint64_t size;
+  uint32_t size;
 };
 
 void
@@ -66,18 +70,10 @@ kernel_memory_init(memory_region* workable,
   for (unsigned int i = 0; i < mbi->mmap_length; i++) {
     multiboot_memory_map_t* mmm_table =
       (multiboot_memory_map_t*)(mbi->mmap_addr + i);
-    // printf("ID: %d | Start Addr: %llx | Length: %llx | Size: %x | Type:
-    // %d\n",
-    //        i,
-    //        mmm_table->addr,
-    //        mmm_table->len,
-    //        mmm_table->size,
-    //        mmm_table->type);
     if (mmm_table->type == MULTIBOOT_MEMORY_AVAILABLE) {
       workable[entries++] = { .base_addr = mmm_table->addr,
                               .len = mmm_table->len,
                               .size = mmm_table->size };
-      // printf("Memory block available!\n");
     }
   }
 }
@@ -121,15 +117,14 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
   memory_region* largest;
   largest = kernel_memory_find_largest(memory);
   klog.write(comp::RAM, "Largest Workable Region found");
-  if (largest->len > 0) {
-    klog.write(comp::RAM, "Base: %llx", largest->base_addr);
-    klog.write(comp::RAM, "Length: %ld MiB", largest->len / (1024 * 1024));
-  }
-  // klog.write(comp::RAM,
-  //            "Base: %llx | Length: %d | Size: %lld GiB",
-  //            largest->base_addr,
-  //            largest->len,
-  //            largest->size / (1024 * 1024 * 1024));
+  klog.write(comp::RAM,
+             "Base: %llx | Length: %lld MiB | Size: %x",
+             largest->base_addr,
+             largest->len / (1024 * 1024),
+             largest->size);
+
+  klog.write(comp::RAM, "kernel_end at %x", &kernel_end);
+
   klog.write(comp::Kernel, "Hello!");
 
   abort();
