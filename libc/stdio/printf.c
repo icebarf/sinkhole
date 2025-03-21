@@ -30,8 +30,8 @@ __iota_num_string(long long num, long base)
     return "0";
   const char chars[] = "0123456789ABCDEF";
   static char buf[100] = { 0 }; // more than enough
-  memset(buf, 0, sizeof(buf));
   int cursor = __numlen(num, base);
+  buf[cursor] = 0;
 
   long long tmp = num;
   while (tmp) {
@@ -64,19 +64,21 @@ printf(const char* __restrict fmt, ...)
           LONG_LONG:
             fmt++;
             if (*fmt == 'd') {
-              long long a = va_arg(args, long);
+              long long a = va_arg(args, long long);
               int l = __numlen(a, 10);
               const char* num = __iota_num_string(a, 10);
+
               __putstring(num);
               cursor += l;
             } else if (*fmt == 'x') {
-              long long a = va_arg(args, long);
+              long long a = va_arg(args, long long);
               int l = __numlen(a, 16);
+              const char* num = __iota_num_string(a, 16);
+
               putchar('0');
               putchar('x');
-              const char* num = __iota_num_string(a, 16);
               __putstring(num);
-              cursor += l;
+              cursor += l + 2; // account for two putchar
             } else if (*fmt == 'l')
               goto LONG_LONG;
             break;
@@ -86,27 +88,31 @@ printf(const char* __restrict fmt, ...)
             int l = __numlen(a, 10);
             const char* num = __iota_num_string(a, 10);
             __putstring(num);
+
             cursor += l;
             break;
           }
           case 'x': {
             long a = va_arg(args, long);
             int l = __numlen(a, 16);
+            const char* num = __iota_num_string(a, 16);
+
             putchar('0');
             putchar('x');
-            const char* num = __iota_num_string(a, 16);
             __putstring(num);
-            cursor += l;
+            cursor += l + 2; // account for two putchar
             break;
           }
           case 'c': {
             char c = (char)(va_arg(args, int));
+
             putchar(c);
             cursor++;
             break;
           }
           case 's': {
             const char* str = va_arg(args, const char*);
+
             int l = __putstring(str);
             cursor += l;
             break;
