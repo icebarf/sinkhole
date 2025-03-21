@@ -13,7 +13,7 @@ __putstring(const char* str)
 }
 
 static int
-__numlen(long num, long base)
+__numlen(long long num, long base)
 {
   int len = 0;
   while (num) {
@@ -24,7 +24,7 @@ __numlen(long num, long base)
 }
 
 static const char*
-__iota_num_string(long num, int base)
+__iota_num_string(long long num, long base)
 {
   if (num == 0)
     return "0";
@@ -33,9 +33,9 @@ __iota_num_string(long num, int base)
   memset(buf, 0, sizeof(buf));
   int cursor = __numlen(num, base);
 
-  long tmp = num;
+  long long tmp = num;
   while (tmp) {
-    long t = tmp % base;
+    long long t = tmp % base;
     buf[--cursor] = chars[t];
     tmp /= base;
   }
@@ -64,13 +64,13 @@ printf(const char* __restrict fmt, ...)
           LONG_LONG:
             fmt++;
             if (*fmt == 'd') {
-              long a = va_arg(args, long);
+              long long a = va_arg(args, long);
               int l = __numlen(a, 10);
               const char* num = __iota_num_string(a, 10);
               __putstring(num);
               cursor += l;
             } else if (*fmt == 'x') {
-              long a = va_arg(args, long);
+              long long a = va_arg(args, long);
               int l = __numlen(a, 16);
               putchar('0');
               putchar('x');
@@ -102,6 +102,7 @@ printf(const char* __restrict fmt, ...)
           case 'c': {
             char c = (char)(va_arg(args, int));
             putchar(c);
+            cursor++;
             break;
           }
           case 's': {
@@ -115,6 +116,7 @@ printf(const char* __restrict fmt, ...)
       }
       default:
         putchar(*fmt);
+        cursor++;
     }
     fmt++;
   }
