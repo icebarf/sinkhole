@@ -19,6 +19,7 @@ Currently everything is rudimentary, getting up from the ground.
 - [ ] Keyboard Input
 - [ ] Libc
 - [ ] Major Drivers
+- [x] Memory Detection
 - [ ] Memory Map
 - [ ] Serial Input Output
   - [ ] Input

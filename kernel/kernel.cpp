@@ -4,7 +4,6 @@
 #include <kernel/utils/log>
 #include <kernel/vga_tty>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
