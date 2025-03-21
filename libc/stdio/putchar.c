@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #if defined(__is_libsinkc)
-#include <kernel/io>
+#include <kernel/io/io.hpp>
 #endif
 
 int

@@ -2,7 +2,6 @@
 #define SINKHOLE_ARCH_I386_VGA_H
 
 #include <cstdint>
-#include <stdint.h>
 
 enum vga_color
 {

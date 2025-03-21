@@ -1,6 +1,6 @@
-#include <kernel/io>
-#include <kernel/serial>
-#include <kernel/vga_tty>
+#include <kernel/io/io.hpp>
+#include <kernel/io/serial.hpp>
+#include <kernel/io/vga_tty.hpp>
 
 void
 kputchar(char c)

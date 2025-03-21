@@ -1,6 +1,5 @@
-#include <cstdint>
-#include <kernel/utils/log>
-#include <kernel/utils/random>
+#include <kernel/utils/log.hpp>
+#include <kernel/utils/random.hpp>
 
 #include <stdlib.h>
 

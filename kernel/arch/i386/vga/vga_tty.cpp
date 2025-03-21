@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <string.h>
 
-#include <kernel/vga_tty>
+#include <kernel/io/vga_tty.hpp>
 
 #include "vga.hpp"
 

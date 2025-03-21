@@ -1,4 +1,4 @@
-#include <kernel/utils/random>
+#include <kernel/utils/random.hpp>
 
 uint16_t
 kgen_random_16b()

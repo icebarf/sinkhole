@@ -1,6 +1,6 @@
 #include <cstdint>
-#include <kernel/serial>
-#include <kernel/vga_tty>
+#include <kernel/io/serial.hpp>
+#include <kernel/io/vga_tty.hpp>
 
 #include "serial.hpp"
 

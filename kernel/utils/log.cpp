@@ -1,4 +1,4 @@
-#include <kernel/utils/log>
+#include <kernel/utils/log.hpp>
 
 const char*
 logger::get_component_string(Components c)

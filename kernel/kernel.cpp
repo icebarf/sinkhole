@@ -1,8 +1,7 @@
-#include <cstdint>
 #include <kernel/arch/i386/mem/multiboot.h>
-#include <kernel/serial>
-#include <kernel/utils/log>
-#include <kernel/vga_tty>
+#include <kernel/io/serial.hpp>
+#include <kernel/io/vga_tty.hpp>
+#include <kernel/utils/log.hpp>
 
 #include <stdlib.h>
 #include <string.h>
