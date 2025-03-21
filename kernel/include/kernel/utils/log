@@ -9,9 +9,10 @@ struct logger
   {
     Kernel,
     VGA,
+    RAM,
     Serial,
     StackGuard,
-    Count = 4
+    Count = 5
   };
 
   const char* get_component_string(Components c);
