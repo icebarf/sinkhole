@@ -17,18 +17,20 @@ stack_bottom:
 stack_top:
 
 .align 8
-gdt_canary:
-  .long 0
-# 10 entries
-gdt_begin:
-  .skip 8 * 10
-.global gdt_canary
 .global gdt_begin
+.global gdt_end
+# 32 entries
+gdt_begin:
+  .skip 8 * 32
 gdt_end:
 
 .data
+.global gdt_size
+.align 4
+gdt_size:
+  .int gdt_end - gdt_begin
 gdt:
-  .byte gdt_end - gdt_begin
+  .word gdt_end - gdt_begin
   .long gdt_begin
 
 .section .text
@@ -45,6 +47,8 @@ _start:
   push %ebx
   call _init
   call stack_guard_init
+  # call kernel_create_gdt
+  # call kernel_load_gdt
   call kernel_main
 
   cli
@@ -56,11 +60,11 @@ _start:
 kernel_load_gdt:
   cli
   lgdt gdt
-  jmp $0x000008,$reload_registers # Reloads CS with that address
-reload_registers:
-   mov 0x000010, %eax
-   mov %eax, %ds
-   mov %eax, %es
+  jmp $0x08,$.reload_registers # Reloads CS with that address
+.reload_registers:
+   mov $0x10, %ax
+   mov %ax, %ds
+   mov %ax, %es
    mov %ax, %fs
    mov %ax, %gs
    mov %ax, %ss
