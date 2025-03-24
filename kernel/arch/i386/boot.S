@@ -24,6 +24,12 @@ gdt_begin:
   .skip 8 * 10
 .global gdt_canary
 .global gdt_begin
+gdt_end:
+
+.data
+gdt:
+  .byte gdt_end - gdt_begin
+  .long gdt_begin
 
 .section .text
 .global _start
@@ -48,7 +54,16 @@ _start:
 .global kernel_load_gdt
 .type kernel_load_gdt, @function
 kernel_load_gdt:
-  lgdt gdt_begin
+  cli
+  lgdt gdt
+  jmp $0x000008,$reload_registers # Reloads CS with that address
+reload_registers:
+   mov 0x000010, %eax
+   mov %eax, %ds
+   mov %eax, %es
+   mov %ax, %fs
+   mov %ax, %gs
+   mov %ax, %ss
   ret
 
 .size _start, . - _start

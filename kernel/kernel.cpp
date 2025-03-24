@@ -117,13 +117,13 @@ kernel_create_gdt()
   uint64_t* gdt = (uint64_t*)gdt_begin;
 
   uint64_t entry_cs_sys =
-    create_descriptor(0x100000, 0x000FFFFF, (GDT_CODE_PL0));
+    create_descriptor(0x000000, 0x000FFFFF, (GDT_CODE_PL0));
   uint64_t entry_ds_sys =
-    create_descriptor(0x100000, 0x000FFFFF, (GDT_DATA_PL0));
+    create_descriptor(0x000000, 0x000FFFFF, (GDT_DATA_PL0));
   uint64_t entry_cs_usr =
-    create_descriptor(0x400000, 0x000FFFFF, (GDT_CODE_PL3));
+    create_descriptor(0x000000, 0x000FFFFF, (GDT_CODE_PL3));
   uint64_t entry_ds_usr =
-    create_descriptor(0x400000, 0x000FFFFF, (GDT_DATA_PL3));
+    create_descriptor(0x000000, 0x000FFFFF, (GDT_DATA_PL3));
 
   printf("GDT Entries Generated:\n");
   printf("%llx\n", entry_cs_sys);
