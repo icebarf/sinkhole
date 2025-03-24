@@ -30,6 +30,8 @@ Project sinkhole is an attempt at creating a small, simple, experimental Operati
 
 ### Current Ideas
 
+These dates indicate features done and thoughts had on that particular day.
+
 ### 16 March 2025 - 21 March 2025
 
 Base for a kernel materializes.
