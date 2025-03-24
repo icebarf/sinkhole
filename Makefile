@@ -1,12 +1,14 @@
-SYSTEM_HEADER_PROJECTS=libc kernel
-PROJECTS=libc kernel
+SYSTEM_HEADER_PROJECTS:=libc kernel
+PROJECTS:=libc kernel
+MAIN_PROJECTS:= kernel
+SIDE_PROJECTS:= libc
 
 # Suffix above project names(dirs) with below suffixes
 # using GNU Make's foreach
 # Then use GNU Make's subst to remove suffix and run recipe
 # This is done in order to prevent overriding of old targets
 # DO NOT CHANGE THIS BEHAVIOR UNLESS YOU KNOW WHAT YOU ARE DOING
-SYSPROJ_SUFFIX:=_sysproj_dir
+SYSHEADERPROJ_SUFFIX:=_sysproj_dir
 PROJ_SUFFIX:=_proj_dir
 CLEAN_SUFFIX:=_dir_c
 
@@ -18,16 +20,22 @@ ISODIR:=$(shell pwd)/isodir
 
 .PHONY: headers $(SYSTEM_HEADER_PROJECTS) $(PROJECTS) build iso launch clean
 
-SYSPROJ:=$(foreach dir, $(SYSTEM_HEADER_PROJECTS),$(dir)$(SYSPROJ_SUFFIX))
-headers: $(SYSPROJ)
-$(SYSPROJ):
+SYSHEADERPROJ:=$(foreach dir, $(SYSTEM_HEADER_PROJECTS),$(dir)$(SYSHEADERPROJ_SUFFIX))
+# headers: $(SYSPROJ)
+$(SYSHEADERPROJ):
 	mkdir -p "$(SYSROOT)"
-	cd $(subst $(SYSPROJ_SUFFIX),,$@) && DESTDIR=$(SYSROOT) $(MAKE) install-headers
+	cd $(subst $(SYSHEADERPROJ_SUFFIX),,$@) && DESTDIR=$(SYSROOT) $(MAKE) install-headers
 
-PROJ:=$(foreach dir, $(PROJECTS),$(dir)$(PROJ_SUFFIX))
-build: headers $(PROJ)
-$(PROJ):
+
+SIDE:=$(foreach dir, $(SIDE_PROJECTS),$(dir)$(PROJ_SUFFIX))
+$(SIDE): $(SYSHEADERPROJ)
 	cd $(subst $(PROJ_SUFFIX),,$@) && DESTDIR=$(SYSROOT) $(MAKE) install
+
+MAIN:=$(foreach dir, $(MAIN_PROJECTS),$(dir)$(PROJ_SUFFIX))
+$(MAIN): $(SIDE)
+	cd $(subst $(PROJ_SUFFIX),,$@) && DESTDIR=$(SYSROOT) $(MAKE) install
+
+PROJ:=$(MAIN)
 
 # NOTE: the `$(shell ...)` directive runs before everything else in the
 # target recipe. Therefore, create the directory there even though
@@ -35,7 +43,8 @@ $(PROJ):
 # For sanity, I will be moving the $(shell ...) directive as the first
 # command of the target. This comment may seem outdated but it is actually
 # a self note.
-iso: build
+# iso: build
+iso: $(PROJ)
 	$(shell mkdir -p $(ISODIR)/boot/grub; ./buildutils/write-grub-menuentry.sh $(ISODIR)/boot/grub/grub.cfg)
 	cp $(SYSROOT)/boot/$(PROJECT).kernel $(ISODIR)/boot/$(PROJECT).kernel
 	grub-mkrescue -o $(PROJECT).iso $(ISODIR)
@@ -51,6 +60,7 @@ $(CLEANING_AREA):
 	cd $(subst _dir_c,,$@) && $(MAKE) clean
 
 ROOT_CLEAN:
+	rm -rf .cache
 	rm -rf sysroot
 	rm -rf isodir
 	rm -rf sinkhole.iso
