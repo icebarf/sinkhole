@@ -1,21 +1,29 @@
-#include <cstdint>
-
+#include <kernel/arch/i386/gdt/gdt.hpp>
 #include <kernel/arch/i386/mem/multiboot.h>
 #include <kernel/io/serial.hpp>
 #include <kernel/io/vga_tty.hpp>
 #include <kernel/utils/log.hpp>
+#include <kernel/utils/random.hpp>
 
+#include <cstdint>
 #include <stdlib.h>
 #include <string.h>
 
-static logger klog;
-using comp = logger::Components;
+// external symbols
+extern bool __stack_guard_initialized;
+extern uintptr_t gdt_begin;
+extern uint32_t gdt_canary;
+extern uintptr_t kernel_end;
+extern "C" void
+kernel_load_gdt();
 
+// symbols for local use
+static uint32_t __local_gdt_canary = 0;
 static constexpr int MAX_WORKABLE_MEM_ENTRIES = 20;
 
-extern bool __stack_guard_initialized;
-
-extern uintptr_t kernel_end;
+// logging
+static logger klog;
+using comp = logger::Components;
 
 void
 output_init()
@@ -100,6 +108,38 @@ kernel_memory_find_largest(memory_region* memory)
   return largest;
 }
 
+void
+kernel_create_gdt()
+{
+  gdt_canary = kgen_random_32b();
+  __local_gdt_canary = gdt_canary;
+
+  uint64_t* gdt = (uint64_t*)gdt_begin;
+
+  uint64_t entry_cs_sys =
+    create_descriptor(0x100000, 0x000FFFFF, (GDT_CODE_PL0));
+  uint64_t entry_ds_sys =
+    create_descriptor(0x100000, 0x000FFFFF, (GDT_DATA_PL0));
+  uint64_t entry_cs_usr =
+    create_descriptor(0x400000, 0x000FFFFF, (GDT_CODE_PL3));
+  uint64_t entry_ds_usr =
+    create_descriptor(0x400000, 0x000FFFFF, (GDT_DATA_PL3));
+
+  printf("GDT Entries Generated:\n");
+  printf("%llx\n", entry_cs_sys);
+  printf("%llx\n", entry_ds_sys);
+  printf("%llx\n", entry_cs_usr);
+  printf("%llx\n", entry_ds_usr);
+
+  gdt[0] = 0;
+  gdt[1] = entry_cs_sys;
+  gdt[2] = entry_ds_sys;
+  gdt[3] = entry_cs_usr;
+  gdt[4] = entry_ds_usr;
+
+  printf("GDT Entries Written to pre-allocated table at: %x\n", &gdt_begin);
+}
+
 extern "C" void
 kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
 {
@@ -124,6 +164,10 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
              largest->size);
 
   klog.write(comp::RAM, "kernel_end at %x", &kernel_end);
+
+  kernel_create_gdt();
+  kernel_load_gdt();
+  klog.write(comp::Kernel, "loaded GDT Register with %x", &gdt_begin);
 
   klog.write(comp::Kernel, "Hello!");
 
