@@ -66,7 +66,8 @@ __iota_num_string_signed(long long num, unsigned long base)
     return "0";
 
   const char chars[] = "0123456789ABCDEF";
-  static char buf[100] = { 0 }; // more than enough
+  static char buf[256] = { 0 }; // more than enough
+  memset(buf, 0, sizeof(buf));
   bool is_negative = false;
 
   if (num < 0) {
@@ -74,7 +75,9 @@ __iota_num_string_signed(long long num, unsigned long base)
     is_negative = true;
   }
 
-  int cursor = __numlen_signed(num, base) + 1; // account for '-' and 0 byte
+  int cursor = __numlen_signed(num, base);
+  if (is_negative)
+    cursor += 1; // account for '-' and 0 byte
   buf[cursor] = 0;
 
   long long tmp = num;
@@ -84,7 +87,7 @@ __iota_num_string_signed(long long num, unsigned long base)
     tmp /= base;
   }
   if (is_negative)
-    buf[cursor] = '-';
+    buf[--cursor] = '-';
 
   return buf;
 }
