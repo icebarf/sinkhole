@@ -1,20 +1,36 @@
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
-static int
+static unsigned long
 __putstring(const char* str)
 {
-  int len = (int)strlen(str);
-  for (int i = 0; i < len; i++)
+  unsigned long len = strlen(str);
+  for (unsigned int i = 0; i < len; i++)
     putchar(str[i]);
   return len;
 }
 
 static int
-__numlen(long long num, long base)
+__numlen_signed(long long num, unsigned long base)
 {
+  if (num == 0)
+    return 1;
+  int len = 0;
+  while (num) {
+    num /= base;
+    len++;
+  }
+  return len;
+}
+
+static int
+__numlen_unsigned(unsigned long long num, unsigned long base)
+{
+  if (num == 0)
+    return 1;
   int len = 0;
   while (num) {
     num /= base;
@@ -24,13 +40,41 @@ __numlen(long long num, long base)
 }
 
 static const char*
-__iota_num_string(long long num, long base)
+__iota_num_string_unsigned(unsigned long long num, unsigned long base)
 {
   if (num == 0)
     return "0";
   const char chars[] = "0123456789ABCDEF";
   static char buf[100] = { 0 }; // more than enough
-  int cursor = __numlen(num, base);
+  int cursor = __numlen_unsigned(num, base);
+  buf[cursor] = 0;
+
+  unsigned long long tmp = num;
+  while (tmp) {
+    unsigned long long t = tmp % base;
+    buf[--cursor] = chars[t];
+    tmp /= base;
+  }
+
+  return buf;
+}
+
+static const char*
+__iota_num_string_signed(long long num, unsigned long base)
+{
+  if (num == 0)
+    return "0";
+
+  const char chars[] = "0123456789ABCDEF";
+  static char buf[100] = { 0 }; // more than enough
+  bool is_negative = false;
+
+  if (num < 0) {
+    num = -num;
+    is_negative = true;
+  }
+
+  int cursor = __numlen_signed(num, base) + 1; // account for '-' and 0 byte
   buf[cursor] = 0;
 
   long long tmp = num;
@@ -39,6 +83,8 @@ __iota_num_string(long long num, long base)
     buf[--cursor] = chars[t];
     tmp /= base;
   }
+  if (is_negative)
+    buf[cursor] = '-';
 
   return buf;
 }
@@ -46,7 +92,7 @@ __iota_num_string(long long num, long base)
 int
 printf(const char* __restrict fmt, ...)
 {
-  int cursor = 0;
+  unsigned long cursor = 0;
 
   int len = (int)strlen(fmt);
   if (!len)
@@ -60,62 +106,149 @@ printf(const char* __restrict fmt, ...)
       case '%': {
         fmt++;
         switch (*fmt) {
+          // LONG INT
+          case '%': {
+            putchar('%');
+            cursor++;
+          } break;
+
           case 'l': {
-          LONG_LONG:
             fmt++;
-            if (*fmt == 'd') {
-              long long a = va_arg(args, long long);
-              int l = __numlen(a, 10);
-              const char* num = __iota_num_string(a, 10);
+            switch (*fmt) {
+              case 'u': {
+                unsigned long a = va_arg(args, unsigned long);
+                const char* num = __iota_num_string_unsigned(a, 10);
+                size_t l = strlen(num);
+                __putstring(num);
+                cursor += l;
+              } break;
 
-              __putstring(num);
-              cursor += l;
-            } else if (*fmt == 'x') {
-              long long a = va_arg(args, long long);
-              int l = __numlen(a, 16);
-              const char* num = __iota_num_string(a, 16);
+              case 'i':
+              case 'd': {
+                long a = va_arg(args, long);
+                const char* num = __iota_num_string_signed(a, 10);
+                size_t l = strlen(num);
+                __putstring(num);
+                cursor += l;
+              } break;
 
-              putchar('0');
-              putchar('x');
-              __putstring(num);
-              cursor += l + 2; // account for two putchar
-            } else if (*fmt == 'l')
-              goto LONG_LONG;
-            break;
+              case 'x': {
+              PRINTF_POINTER_OUT:
+                unsigned long a = va_arg(args, unsigned long);
+                const char* num = __iota_num_string_unsigned(a, 16);
+                size_t l = strlen(num);
+                __putstring(num);
+                cursor += l; // account for two putchar
+              } break;
+
+              // LONG LONG INT
+              case 'l': {
+                fmt++;
+
+                switch (*fmt) {
+                  case 'u': {
+                    unsigned long long a = va_arg(args, unsigned long long);
+                    const char* num = __iota_num_string_unsigned(a, 10);
+                    size_t l = strlen(num);
+                    __putstring(num);
+                    cursor += l;
+                  } break;
+
+                  case 'i':
+                  case 'd': {
+                    long long a = va_arg(args, long long);
+                    const char* num = __iota_num_string_signed(a, 10);
+                    __putstring(num);
+                    size_t l = strlen(num);
+                    cursor += l;
+                  } break;
+
+                  case 'x': {
+                    unsigned long long a = va_arg(args, unsigned long long);
+                    const char* num = __iota_num_string_unsigned(a, 16);
+                    __putstring(num);
+                    size_t l = strlen(num);
+                    cursor += l; // account for two putchar
+                  } break;
+
+                  default:
+                    break;
+                }
+              }
+
+              default:
+                break;
+            }
+            default:
+              break;
           }
-          case 'd': {
-            long a = va_arg(args, long);
-            int l = __numlen(a, 10);
-            const char* num = __iota_num_string(a, 10);
-            __putstring(num);
 
+          case 'z': {
+            fmt++;
+            switch (*fmt) {
+              case 'x':
+              case 'X': {
+                size_t a = va_arg(args, size_t);
+                const char* num = __iota_num_string_unsigned(a, 16);
+                __putstring(num);
+                size_t l = strlen(num);
+                cursor += l;
+              } break;
+
+              case 'u': {
+                size_t a = va_arg(args, size_t);
+                const char* num = __iota_num_string_unsigned(a, 10);
+                __putstring(num);
+                size_t l = strlen(num);
+                cursor += l;
+              } break;
+            }
+          } break;
+
+          case 'u': {
+            unsigned int a = va_arg(args, unsigned int);
+            const char* num = __iota_num_string_unsigned(a, 10);
+            __putstring(num);
+            size_t l = strlen(num);
             cursor += l;
             break;
           }
-          case 'x': {
-            long a = va_arg(args, long);
-            int l = __numlen(a, 16);
-            const char* num = __iota_num_string(a, 16);
 
-            putchar('0');
-            putchar('x');
+          case 'i':
+          case 'd': {
+            int a = va_arg(args, int);
+            const char* num = __iota_num_string_signed(a, 10);
             __putstring(num);
-            cursor += l + 2; // account for two putchar
+            size_t l = strlen(num);
+            cursor += l;
             break;
           }
+
+          case 'x': {
+            unsigned int a = va_arg(args, unsigned int);
+            const char* num = __iota_num_string_unsigned(a, 16);
+            __putstring(num);
+            size_t l = strlen(num);
+            cursor += l;
+            break;
+          }
+
           case 'c': {
             char c = (char)(va_arg(args, int));
-
             putchar(c);
             cursor++;
             break;
           }
+
           case 's': {
             const char* str = va_arg(args, const char*);
-
-            int l = __putstring(str);
+            unsigned long l = __putstring(str);
             cursor += l;
             break;
+          }
+
+          case 'p': {
+            goto PRINTF_POINTER_OUT;
           }
         }
         break;
@@ -128,5 +261,5 @@ printf(const char* __restrict fmt, ...)
   }
 
   va_end(args);
-  return cursor;
+  return (int)cursor;
 }
