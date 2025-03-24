@@ -141,13 +141,13 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
   kernel_memory_init(memory, mb_info, mb_magic);
   uint64_t mem_available = kernel_memory_total_available(memory);
   klog.write(comp::RAM, "Total Size: 0x%lx Bytes", mem_available);
-  klog.write(comp::RAM, "Total Size: %lu MiB", (mem_available / (1024 * 1024)));
+  klog.write(comp::RAM, "Total Size: %ld MiB", (mem_available / (1024 * 1024)));
 
   memory_region* largest;
   largest = kernel_memory_find_largest(memory);
   klog.write(comp::RAM, "Largest Workable Region found");
   klog.write(comp::RAM,
-             "Base: 0x%llx | Length: %llu MiB | Size: 0x%x",
+             "Base: 0x%llx | Length: %lld MiB | Size: 0x%x",
              largest->base_addr,
              largest->len / (1024 * 1024),
              largest->size);
@@ -158,11 +158,11 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
   kernel_load_gdt();
   klog.write(
     comp::Kernel, "Loaded GDT Register with table located at 0x%p", &gdt_begin);
-  klog.write(comp::Kernel, "GDT Size: %u Bytes", gdt_size);
+  klog.write(comp::Kernel, "GDT Size: %d Bytes", gdt_size);
   klog.write(
-    comp::Kernel, "GDT Entries Possible: %u", gdt_size / sizeof(uint64_t));
+    comp::Kernel, "GDT Entries Possible: %d", gdt_size / sizeof(uint64_t));
   klog.write(
-    comp::Kernel, "Current GDT Entries count: %u", gdt_entries_written);
+    comp::Kernel, "Current GDT Entries count: %d", gdt_entries_written);
 
   klog.write(comp::Kernel, "Hello!");
 
