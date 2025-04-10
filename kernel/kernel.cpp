@@ -11,8 +11,6 @@
 
 // external symbols
 extern bool __stack_guard_initialized;
-extern int gdt_size;
-extern uintptr_t gdt_begin;
 extern uintptr_t kernel_end;
 extern "C" void
 kernel_load_gdt();

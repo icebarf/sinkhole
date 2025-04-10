@@ -72,8 +72,15 @@ create_descriptor(const uint32_t base,
   return descriptor;
 }
 
-void gdt_create();
-
-void gdt_load();
+extern "C" constexpr int gdt_max_entries = 32;
+extern "C" uint64_t gdt_entries[gdt_max_entries] = {
+  0,
+  create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0)),
+  create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0)),
+  create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3)),
+  create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3)),
+};
+extern "C" uint16_t gdt_size = sizeof(gdt_entries);
+extern "C" uintptr_t gdt_begin = reinterpret_cast<uintptr_t>(&gdt_entries);
 
 #endif
