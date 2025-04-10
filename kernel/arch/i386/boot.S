@@ -16,13 +16,6 @@ stack_bottom:
   .skip 16386
 stack_top:
 
-# From arch/i386/gdt/gdt.cpp
-.data
-.align 4
-gdt:
-  .word gdt_size
-  .long gdt_entries
-
 .section .text
 .global _start
 .type _start, @function
@@ -37,27 +30,10 @@ _start:
   push %ebx
   call _init
   call stack_guard_init
-  # call kernel_create_gdt
-  # call kernel_load_gdt
   call kernel_main
 
   cli
 1:hlt
   jmp 1b
-
-.global kernel_load_gdt
-.type kernel_load_gdt, @function
-kernel_load_gdt:
-  cli
-  lgdt gdt
-  jmp $0x08,$.reload_registers # Reloads CS with that address
-.reload_registers:
-   mov $0x10, %ax
-   mov %ax, %ds
-   mov %ax, %es
-   mov %ax, %fs
-   mov %ax, %gs
-   mov %ax, %ss
-  ret
 
 .size _start, . - _start

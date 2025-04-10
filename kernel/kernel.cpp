@@ -135,7 +135,7 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
     comp::Kernel, "Loaded GDT Register with table located at 0x%p", &gdt_begin);
   klog.write(comp::Kernel, "GDT Size: %d Bytes", gdt_size);
   klog.write(
-    comp::Kernel, "GDT Entries Possible: %d", gdt_size / sizeof(uint64_t));
+    comp::Kernel, "GDT Entries Possible: %d", gdt_size / sizeof(gdt_entry_t));
 
   klog.write(comp::Kernel, "Hello!");
 

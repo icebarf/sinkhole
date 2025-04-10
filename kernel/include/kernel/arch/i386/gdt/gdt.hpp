@@ -73,7 +73,8 @@ create_descriptor(const uint32_t base,
 }
 
 extern "C" constexpr int gdt_max_entries = 32;
-extern "C" uint64_t gdt_entries[gdt_max_entries] = {
+using gdt_entry_t = uint64_t;
+extern "C" gdt_entry_t gdt_entries[gdt_max_entries] = {
   0,
   create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0)),
   create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0)),
