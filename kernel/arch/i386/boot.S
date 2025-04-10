@@ -16,22 +16,12 @@ stack_bottom:
   .skip 16386
 stack_top:
 
-.align 8
-.global gdt_begin
-.global gdt_end
-# 32 entries
-gdt_begin:
-  .skip 8 * 32
-gdt_end:
-
+# From arch/i386/gdt/gdt.cpp
 .data
-.global gdt_size
 .align 4
-gdt_size:
-  .int gdt_end - gdt_begin
 gdt:
-  .word gdt_end - gdt_begin
-  .long gdt_begin
+  .word gdt_size
+  .long gdt_entries
 
 .section .text
 .global _start

@@ -72,4 +72,8 @@ create_descriptor(const uint32_t base,
   return descriptor;
 }
 
+void gdt_create();
+
+void gdt_load();
+
 #endif

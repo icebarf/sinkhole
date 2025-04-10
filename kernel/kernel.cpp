@@ -13,14 +13,12 @@
 extern bool __stack_guard_initialized;
 extern int gdt_size;
 extern uintptr_t gdt_begin;
-extern uintptr_t gdt_end;
 extern uintptr_t kernel_end;
 extern "C" void
 kernel_load_gdt();
 
 // symbols for local use
 static constexpr int MAX_WORKABLE_MEM_ENTRIES = 20;
-static long int gdt_entries_written = 0;
 
 // logging
 static logger klog;
@@ -110,26 +108,6 @@ kernel_memory_find_largest(memory_region* memory)
 }
 
 extern "C" void
-kernel_create_gdt()
-{
-  klog.write(comp::Kernel, "GDT Table Located at 0x%p", &gdt_begin);
-  uint64_t* gdt = (uint64_t*)&gdt_begin;
-
-  uint64_t entry_cs_sys = create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0));
-  uint64_t entry_ds_sys = create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0));
-  uint64_t entry_cs_usr = create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3));
-  uint64_t entry_ds_usr = create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3));
-
-  gdt[0] = 0;
-  gdt[1] = entry_cs_sys;
-  gdt[2] = entry_ds_sys;
-  gdt[3] = entry_cs_usr;
-  gdt[4] = entry_ds_usr;
-  gdt_entries_written += 5;
-  klog.write(comp::Kernel, "Entries filled into GDT");
-}
-
-extern "C" void
 kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
 {
   memory_region memory[MAX_WORKABLE_MEM_ENTRIES];
@@ -154,15 +132,12 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
 
   klog.write(comp::RAM, "kernel_end at 0x%lx", &kernel_end);
 
-  kernel_create_gdt();
   kernel_load_gdt();
   klog.write(
     comp::Kernel, "Loaded GDT Register with table located at 0x%p", &gdt_begin);
   klog.write(comp::Kernel, "GDT Size: %d Bytes", gdt_size);
   klog.write(
     comp::Kernel, "GDT Entries Possible: %d", gdt_size / sizeof(uint64_t));
-  klog.write(
-    comp::Kernel, "Current GDT Entries count: %d", gdt_entries_written);
 
   klog.write(comp::Kernel, "Hello!");
 

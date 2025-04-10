@@ -2,7 +2,9 @@ ENTRY(_start)
 
 SECTIONS
 {
-  . = 1M;
+# . = 1M; doesn't work because some parts seemingly get pushed out
+# INVESTIGATE!!!!!!!!!!!!!!!  
+  . = 0M;
 
   .text BLOCK(4K) : ALIGN(4K)
   {
