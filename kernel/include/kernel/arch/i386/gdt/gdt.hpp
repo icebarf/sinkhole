@@ -49,14 +49,15 @@
                      SEG_LONG(0)     | SEG_SIZE(1) | SEG_GRAN(1) | \
                      SEG_PRIV(3)     | SEG_DATA_RDWR
  
-constexpr uint64_t
-create_descriptor(const uint32_t base,
+using gdt_entry_t = uint64_t;
+static constexpr gdt_entry_t
+gdt_create_descriptor(const uint32_t base,
                   const uint32_t limit,
                   const uint16_t flag)
 {
   uint64_t descriptor = 0;
  
-  // Create the high 32 bit segment
+  // gdt_create the high 32 bit segment
   descriptor  =  limit       & 0x000F0000; // set limit bits 19:16
   descriptor |= (flag <<  8) & 0x00F0FF00; // set type, p, dpl, s, g, d/b, l and avl fields
   descriptor |= (base >> 16) & 0x000000FF; // set base bits 23:16
@@ -65,7 +66,7 @@ create_descriptor(const uint32_t base,
   // Shift by 32 to allow for low part of segment
   descriptor <<= 32;
  
-  // Create the low 32 bit segment
+  // gdt_create the low 32 bit segment
   descriptor |= base  << 16;        // set base bits 15:0
   descriptor |= limit  & 0x0000FFFF;// set limit bits 15:0
 
@@ -73,13 +74,12 @@ create_descriptor(const uint32_t base,
 }
 
 extern "C" constexpr int gdt_max_entries = 32;
-using gdt_entry_t = uint64_t;
 extern "C" gdt_entry_t gdt_entries[gdt_max_entries] = {
   0,
-  create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0)),
-  create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0)),
-  create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3)),
-  create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3)),
+  gdt_create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0)),
+  gdt_create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0)),
+  gdt_create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL3)),
+  gdt_create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3)),
 };
 extern "C" uint16_t gdt_size = sizeof(gdt_entries);
 extern "C" uintptr_t gdt_begin = reinterpret_cast<uintptr_t>(&gdt_entries);
