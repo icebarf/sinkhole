@@ -11,7 +11,7 @@ Project sinkhole is an attempt at creating a small, simple, experimental Operati
 - [ ] Debugging
 - [ ] File System
 - [x] Global Descriptor Table
-- [ ] Interrupts (IDT, IDTR)
+- [x] Interrupts (IDT, IDTR)
 - [ ] Keyboard Input
 - [ ] Libc
 - [ ] Major Drivers
@@ -24,9 +24,9 @@ Project sinkhole is an attempt at creating a small, simple, experimental Operati
 - [x] Stack Smashing Protection
 - [x] VGA Output
 
-| Qemu Output | Serial Port Log |
-|-------------|-----------------|
-| ![](images/qemu.png) | ![](images/serial.png) |
+| Qemu Output |
+|-------------|
+| ![](images/qemu.png) |
 
 ### Current Ideas
 
