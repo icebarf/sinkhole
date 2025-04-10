@@ -1,4 +1,5 @@
 #include <kernel/arch/i386/gdt/gdt.hpp>
+#include <kernel/arch/i386/idt/idt.hpp>
 #include <kernel/arch/i386/mem/multiboot.h>
 #include <kernel/io/serial.hpp>
 #include <kernel/io/vga_tty.hpp>
@@ -14,6 +15,8 @@ extern bool __stack_guard_initialized;
 extern uintptr_t kernel_end;
 extern "C" void
 kernel_load_gdt();
+extern "C" void
+kernel_load_idt();
 
 // symbols for local use
 static constexpr int MAX_WORKABLE_MEM_ENTRIES = 20;
@@ -131,13 +134,19 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
   klog.write(comp::RAM, "kernel_end at 0x%lx", &kernel_end);
 
   kernel_load_gdt();
-  klog.write(
-    comp::Kernel, "Loaded GDT Register with table located at 0x%p", &gdt_begin);
+  klog.write(comp::Kernel,
+             "Loaded GDT Register with table located at 0x%p",
+             &gdt_entries);
   klog.write(comp::Kernel, "GDT Size: %d Bytes", gdt_size);
   klog.write(
     comp::Kernel, "GDT Entries Possible: %d", gdt_size / sizeof(gdt_entry_t));
 
-  klog.write(comp::Kernel, "Hello!");
+  idt_create();
+  kernel_load_idt();
+  klog.write(comp::Kernel,
+             "Loaded IDT Register with table located at 0x%p",
+             &idt_entries);
+  klog.write(comp::Kernel, "IDT Limit: %d Bytes", idt_limit);
 
-  abort();
+  klog.write(comp::Kernel, "Hello!");
 }
