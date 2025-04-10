@@ -21,7 +21,7 @@ ISODIR:=$(shell pwd)/isodir
 .PHONY: headers $(SYSTEM_HEADER_PROJECTS) $(PROJECTS) build iso launch clean
 
 SYSHEADERPROJ:=$(foreach dir, $(SYSTEM_HEADER_PROJECTS),$(dir)$(SYSHEADERPROJ_SUFFIX))
-# headers: $(SYSPROJ)
+headers: $(SYSHEADERPROJ)
 $(SYSHEADERPROJ):
 	mkdir -p "$(SYSROOT)"
 	cd $(subst $(SYSHEADERPROJ_SUFFIX),,$@) && DESTDIR=$(SYSROOT) $(MAKE) install-headers
