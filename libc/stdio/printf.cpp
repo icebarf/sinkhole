@@ -17,7 +17,7 @@ putstring(const char* str)
 
 template<typename T>
 static int
-numlen(T num, unsigned long base)
+numlen(T num, T base)
 {
   if (num == 0)
     return 1;
@@ -31,7 +31,7 @@ numlen(T num, unsigned long base)
 
 template<typename T>
 static const char*
-iota_num_string(T num, unsigned long base)
+iota_num_string(T num, T base)
 {
   if (num == 0)
     return "0";
@@ -46,7 +46,7 @@ iota_num_string(T num, unsigned long base)
     is_negative = true;
   }
 
-  int cursor = numlen<T>(num, base);
+  int cursor = numlen(num, base);
   if (is_negative)
     cursor += 1; // account for '-' and 0 byte
   buf[cursor] = 0;
@@ -71,10 +71,9 @@ printf(const char* __restrict fmt, ...)
 {
   unsigned long cursor = 0;
 
-  const auto& print_int = [&cursor](auto arg, unsigned int base) {
+  const auto& print_int = [&cursor]<typename T>(T arg, T base) {
     const char* num = iota_num_string<decltype(arg)>(arg, base);
-    size_t len = strlen(num);
-    putstring(num);
+    size_t len = putstring(num);
     cursor += len;
   };
 
@@ -89,12 +88,12 @@ printf(const char* __restrict fmt, ...)
 
   const auto& handle_generic_int = [&args, &print_int]<typename T, int base>() {
     T arg = va_arg(args, T);
-    print_int(arg, base);
+    print_int(arg, static_cast<T>(base));
   };
 
   const auto& handle_all_ints =
     // `&args` is captured but further captured and used in handle_generic_int
-    [&args, &fmt, &handle_generic_int]<typename T>() {
+    [&fmt, &handle_generic_int]<typename T>() {
       using Type = T;
       using uType = std::make_unsigned_t<T>;
 
