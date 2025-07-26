@@ -5,7 +5,7 @@ HOSTARCH:=$(shell ../buildutils/target-triplet-to-host.sh $(HOST))
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
-CXXFLAGS?=
+CXXFLAGS?= -std=c++20
 LDFLAGS?=
 LIBS?=
 
