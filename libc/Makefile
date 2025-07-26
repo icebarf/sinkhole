@@ -60,7 +60,7 @@ LIBSINKC_OBJS=$(FREEOBJS:.o=.libsinkc.o)
 BINARIES=libsinkc.a
 
 .PHONY: all clean install install-headers install-libs
-.SUFFIXES: .o .libsinkc.o .c .S
+.SUFFIXES: .o .libsinkc.o .c .cpp .S
 
 all: $(BINARIES)
 
@@ -70,18 +70,18 @@ libc.a: $(OBJS)
 libsinkc.a: $(LIBSINKC_OBJS)
 	$(AR) rcs $@ $(LIBSINKC_OBJS)
 
-.c.o:
-	echo "LIBC .c.o"
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+.cpp.o:
+	echo "LIBC .cpp.o"
+	$(CXX) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 .S.o:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
-.c.libsinkc.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) -D__is_libsinkc
+.cpp.libsinkc.o:
+	$(CXX) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) $(LIBSINKC_CXXFLAGS) -D__is_libsinkc
 
 .S.libsinkc.o:
-	$(CC) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) $(LIBSINKC_CXXFLAGS)
 
 clean:
 	rm -f $(BINARIES) *.a

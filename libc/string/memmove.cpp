@@ -3,8 +3,8 @@
 void*
 memmove(void* dest, const void* src, size_t n)
 {
-  const unsigned char* _src = src;
-  unsigned char* _dest = dest;
+  const unsigned char* _src = reinterpret_cast<const unsigned char*>(src);
+  unsigned char* _dest = reinterpret_cast<unsigned char*>(dest);
 
   if (_src == _dest || n == 0)
     return _dest;
