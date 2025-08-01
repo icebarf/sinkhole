@@ -15,9 +15,9 @@ EXEC_PREFIX?=$(PREFIX)
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -Wformat=2 -fno-exceptions -fno-rtti -std=c++20 
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
-CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
+CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti -std=c++20
 LIBSINKC_CFLAGS:=$(CFLAGS)
 LIBSINKC_CPPFLAGS:=$(CPPFLAGS) -D__is_libsinkc
 LIBSINKC_CXXFLAGS:$(CXXFLAGS)

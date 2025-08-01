@@ -14,9 +14,9 @@ EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -fstack-protector-strong
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -fstack-protector-strong -fno-exceptions -fno-rtti -std=c++20
 CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -D__SINKHOLE_KERNEL_DO_SERIAL_IO_DEBUG -Iinclude 
-CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
+CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti -std=c++20
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lsinkc -lgcc
 
