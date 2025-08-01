@@ -126,7 +126,7 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
   largest = kernel_memory_find_largest(memory);
   klog.write(comp::RAM, "Largest Workable Region found");
   klog.write(comp::RAM,
-             "Base: 0x%x | Length: %u MiB | Size: 0x%x",
+             "Base: 0x%llx | Length: %llu MiB | Size: 0x%x",
              largest->base_addr,
              largest->len / (1024 * 1024),
              largest->size);
@@ -147,6 +147,5 @@ kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic)
              "Loaded IDT Register with table located at 0x%p",
              &idt_entries);
   klog.write(comp::Kernel, "IDT Limit: %d Bytes", idt_limit);
-  klog.write(comp::Kernel, "printf bug: %lld", -901);
   klog.write(comp::Kernel, "Hello!");
 }
