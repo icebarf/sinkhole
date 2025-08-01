@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <concepts>
 #include <type_traits>
 
 static unsigned long
@@ -15,7 +16,7 @@ putstring(const char* str)
   return len;
 }
 
-template<typename T>
+template<std::integral T>
 static int
 numlen(T num, T base)
 {
@@ -29,7 +30,7 @@ numlen(T num, T base)
   return len;
 }
 
-template<typename T>
+template<std::integral T>
 static const char*
 iota_num_string(T num, T base)
 {
@@ -39,28 +40,36 @@ iota_num_string(T num, T base)
   const char chars[] = "0123456789ABCDEF";
   static char buf[256] = { 0 }; // more than enough
   memset(buf, 0, sizeof(buf));
-  bool is_negative = false;
 
-  if (num < 0) {
-    num = -num;
-    is_negative = true;
+  bool is_negative = false;
+  using unsignedT = std::make_unsigned_t<T>;
+  unsignedT tmp;
+  if constexpr (std::is_signed_v<T>) {
+    if (num < 0) {
+      is_negative = true;
+      tmp = static_cast<unsignedT>(0) - static_cast<unsignedT>(num);
+    } else {
+      tmp = static_cast<unsignedT>(num);
+    }
+  } else {
+    tmp = num;
   }
 
-  int cursor = numlen(num, base);
+  unsignedT ubase = static_cast<unsignedT>(base);
+
+  int cursor = numlen(tmp, ubase);
   if (is_negative)
-    cursor += 1; // account for '-' and 0 byte
+    cursor += 1; // account for '-'
   buf[cursor] = 0;
 
-  T tmp = num;
   while (tmp) {
-    T t = tmp % base;
-    buf[--cursor] = chars[t];
-    tmp /= base;
+    buf[--cursor] = chars[tmp % ubase];
+    tmp /= ubase;
   }
   if (is_negative)
     buf[--cursor] = '-';
 
-  return buf;
+  return &buf[cursor];
 }
 
 constexpr int base_dec = 10;
@@ -71,8 +80,8 @@ printf(const char* __restrict fmt, ...)
 {
   unsigned long cursor = 0;
 
-  const auto& print_int = [&cursor]<typename T>(T arg, T base) {
-    const char* num = iota_num_string<decltype(arg)>(arg, base);
+  const auto& print_int = [&cursor]<std::integral T>(T arg, T base) {
+    const char* num = iota_num_string<T>(arg, base);
     size_t len = putstring(num);
     cursor += len;
   };
@@ -85,19 +94,27 @@ printf(const char* __restrict fmt, ...)
   va_start(args, fmt);
 
   // helpers
-
   const auto& handle_generic_int = [&args, &print_int]<typename T, int base>() {
-    T arg = va_arg(args, T);
-    print_int(arg, static_cast<T>(base));
+    using RawT = std::remove_cv_t<std::remove_reference_t<T>>;
+    RawT arg;
+
+    if constexpr (std::is_same_v<RawT, long long>)
+      arg = va_arg(args, long long);
+    else if constexpr (std::is_same_v<RawT, unsigned long long>)
+      arg = va_arg(args, unsigned long long);
+    else
+      arg = va_arg(args, RawT);
+
+    print_int(arg, static_cast<RawT>(base));
   };
 
   const auto& handle_all_ints =
     // `&args` is captured but further captured and used in handle_generic_int
-    [&fmt, &handle_generic_int]<typename T>() {
+    [&handle_generic_int]<std::integral T>(char fmtc) {
       using Type = T;
       using uType = std::make_unsigned_t<T>;
 
-      switch (*fmt) {
+      switch (fmtc) {
         case 'u': {
           handle_generic_int.template operator()<uType, base_dec>();
         } break;
@@ -128,19 +145,14 @@ printf(const char* __restrict fmt, ...)
           // LONG INT
           case 'l': {
             fmt++;
-            switch (*fmt) {
-              // LONG LONG INT
-              case 'l': {
-                fmt++;
-                handle_all_ints.template operator()<long long>();
-              } // case 'l':
-
-              default:
-                break;
-            }
-            default:
-              handle_all_ints.template operator()<long>();
+            // LONG LONG INT
+            if (*fmt == 'l') {
+              fmt++;
+              handle_all_ints.template operator()<long long>(*fmt);
               break;
+            }
+            handle_all_ints.template operator()<long>(*fmt);
+            break;
           }
 
           case 'z': {
@@ -154,7 +166,11 @@ printf(const char* __restrict fmt, ...)
               case 'u': {
                 handle_generic_int.template operator()<size_t, base_dec>();
               } break;
+
+              default:
+                break;
             }
+
           } break;
 
           case 'u':
@@ -162,31 +178,27 @@ printf(const char* __restrict fmt, ...)
           case 'd':
           case 'X':
           case 'x': {
-            handle_all_ints.template operator()<int>();
-          }
+            handle_all_ints.template operator()<int>(*fmt);
+          } break;
 
           case 'c': {
             char c = (char)(va_arg(args, int));
             putchar(c);
             cursor++;
-            break;
-          }
+          } break;
 
           case 's': {
             const char* str = va_arg(args, const char*);
             unsigned long len = putstring(str);
             cursor += len;
-            break;
-          }
+          } break;
 
           case 'p': {
             handle_generic_int.template operator()<unsigned long, base_hex>();
-            break;
-          }
+          } break;
         }
+      } break;
 
-        break;
-      }
       default:
         putchar(*fmt);
         cursor++;

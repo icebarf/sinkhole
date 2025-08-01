@@ -2,16 +2,21 @@
     {
         "directory": "kernel/",
         "file": "/home/ice/Projects/os/sinkhole/kernel/kernel.cpp",
-        "command": "i686-unknown-elf-g++ --sysroot=../sysroot -isystem=/usr -Iinclude -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding -nostdlib -fno-exceptions -fno-rtti -o kernel.o -c kernel.cpp"
+        "command": "i686-unknown-elf-g++ --sysroot=../sysroot -std=c++20 -isystem=/usr -Iinclude -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding -nostdlib -fno-exceptions -fno-rtti -o kernel.o -c kernel.cpp"
     },
     {
         "directory": "kernel/arch/i386/vga",
         "file": "/home/ice/Projects/os/sinkhole/kernel/arch/i386/vga/vga_tty.cpp",
-        "command": "i686-unknown-elf-g++ --sysroot=../../../../sysroot -isystem=/usr/include -I../../include -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding -nostdlib -fno-exceptions -fno-rtti -o vga_tty.o -c /home/ice/Projects/os/sinkhole/kernel/arch/i386/vga/vga_tty.cpp"
+        "command": "i686-unknown-elf-g++ --sysroot=../../../../sysroot -std=c++20 -isystem=/usr/include -I../../include -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding -nostdlib -fno-exceptions -fno-rtti -o vga_tty.o -c /home/ice/Projects/os/sinkhole/kernel/arch/i386/vga/vga_tty.cpp"
     },
     {
         "directory": "kernel/arch/i386/serial",
         "file": "/home/ice/Projects/os/sinkhole/kernel/arch/i386/serial/serial.cpp",
-        "command": "i686-unknown-elf-g++ --sysroot=../../../../sysroot -isystem=/usr/include -I../../include  -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding  -fno-exceptions -fno-rtti -o serial.o -c /home/ice/Projects/os/sinkhole/kernel/arch/i386/serial/serial.cpp"
+        "command": "i686-unknown-elf-g++ --sysroot=../../../../sysroot -std=c++20 -isystem=/usr/include -I../../include  -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding  -fno-exceptions -fno-rtti -o serial.o -c /home/ice/Projects/os/sinkhole/kernel/arch/i386/serial/serial.cpp"
+    },
+    {
+        "directory": "libc/stdio/printf.cpp",
+        "file": "/home/ice/Projects/os/sinkhole/libc/stdio/printf.cpp",
+        "command": "i686-unknown-elf-g++ --sysroot=../../../../sysroot -std=c++20 -isystem=/usr/include -I../../include  -Wall -Wextra -Wconversion -Wshadow -O2 -g -ffreestanding  -fno-exceptions -fno-rtti -o serial.o -c /home/ice/Projects/os/sinkhole/libc/stdio/printf.cpp"
     }
 ]
