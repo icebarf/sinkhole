@@ -15,12 +15,12 @@ EXEC_PREFIX?=$(PREFIX)
 INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -Wformat=2 -fno-exceptions -fno-rtti -std=c++20 
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra -Wshadow -Wconversion -Wformat=2
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
-CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti -std=c++20
+CXXFLAGS:=$(CXXFLAGS) -fno-exceptions -fno-rtti
 LIBSINKC_CFLAGS:=$(CFLAGS)
 LIBSINKC_CPPFLAGS:=$(CPPFLAGS) -D__is_libsinkc
-LIBSINKC_CXXFLAGS:$(CXXFLAGS)
+LIBSINKC_CXXFLAGS:=$(CXXFLAGS)
 
 ARCHDIR=arch/$(HOSTARCH)
 
@@ -72,13 +72,13 @@ libsinkc.a: $(LIBSINKC_OBJS)
 
 .cpp.o:
 	echo "LIBC .cpp.o"
-	$(CXX) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
+	$(CXX) -MD -c -std=c++20 $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 .S.o:
 	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS)
 
 .cpp.libsinkc.o:
-	$(CXX) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) $(LIBSINKC_CXXFLAGS) -D__is_libsinkc
+	$(CXX) -MD -c -std=c++20 $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) $(LIBSINKC_CXXFLAGS)
 
 .S.libsinkc.o:
 	$(CC) -MD -c $< -o $@ $(LIBSINKC_CFLAGS) $(LIBSINKC_CFLAGS) $(LIBSINKC_CPPFLAGS) $(LIBSINKC_CXXFLAGS)
